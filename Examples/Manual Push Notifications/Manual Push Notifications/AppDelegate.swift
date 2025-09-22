@@ -32,16 +32,17 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         Intercom.enableLogging()
         Intercom.setApiKey(INTERCOM_API_KEY, forAppId: INTERCOM_APP_ID)
         Intercom.setLauncherVisible(true)
+        Intercom.setInAppMessagesVisible(false)
 
-        let defaults = UserDefaults.standard
-        if let email = defaults.string(forKey: emailKey) {
-            let attributes = ICMUserAttributes()
-            attributes.email = email
-            Intercom.loginUser(with: attributes) { result in
-                switch result {
-                case .success: print("Successfully logged in \(email)")
-                case .failure(let error): print("Error logging in: \(error.localizedDescription)")
-                }
+        let jwt = ""
+        Intercom.setUserJwt(jwt)
+
+        let attributes = ICMUserAttributes()
+        attributes.userId = "a561312c-5d4e-11ee-9699-3376f468dedc"
+        Intercom.loginUser(with: attributes) { result in
+            switch result {
+            case .success: print("Successfully logged in")
+            case .failure(let error): print("Error logging in: \(error.localizedDescription)")
             }
         }
     }
@@ -55,7 +56,19 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     
     func application(_ application: UIApplication, didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data) {
         /// Send your `deviceToken` to Intercom once you receive it from the system.
-        Intercom.setDeviceToken(deviceToken)
+        Intercom.setDeviceToken(deviceToken) { result in
+            switch result {
+            case .success:
+                print("Intercom setDeviceToken success")
+            case .failure(let error):
+                print(error.localizedDescription)
+            }
+        }
+    }
+
+    func application(_ application: UIApplication,
+                     didFailToRegisterForRemoteNotificationsWithError error: Error) {
+        print("APNs registration failed: \(error)")
     }
 
     // MARK: UISceneSession Lifecycle
